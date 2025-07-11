@@ -1,16 +1,16 @@
 from flask import Flask, render_template, request, redirect, url_for, session, send_file, flash
 import sqlite3
 from datetime import datetime
-from database import init_db, register_user, login_user, add_expense, get_expenses
-from export import export_to_pdf, export_to_excel, email_pdf
 from database import (
+    init_db,
     register_user,
     login_user,
     add_expense,
     get_expenses,
-    get_monthly_limit,   # ✅ required
-    set_monthly_limit    # ✅ if you use /set_limit route
+    get_monthly_limit,
+    set_monthly_limit
 )
+from export import export_to_pdf, export_to_excel, email_pdf
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  # Needed for session management
@@ -21,11 +21,6 @@ init_db()
 @app.route("/")
 def home():
     return redirect("/login")
-@app.route("/register")
-def register():
-    return render_template("register.html")
-
-
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -57,7 +52,14 @@ def login():
             flash("Invalid credentials", "error")
     return render_template("login.html")
 
-
+@app.route("/dashboard")
+def dashboard():
+    if "username" not in session:
+        return redirect("/login")
+    expenses = get_expenses(session["username"])
+    limit = get_monthly_limit(session["username"])
+    total = sum([e[1] for e in expenses])
+    return render_template("dashboard.html", name=session["name"], expenses=expenses, limit=limit, total=total)
 
 @app.route("/add_expense", methods=["POST"])
 def add_expense_route():
@@ -77,20 +79,7 @@ def add_expense_route():
         return "Amount must be a number", 400
 
     add_expense(session["username"], category, amount, description)
-    
-    # ✅ This is the missing return
     return redirect("/dashboard")
-
-
-
-@app.route("/dashboard")
-def dashboard():
-    if "username" not in session:
-        return redirect("/login")
-    expenses = get_expenses(session["username"])
-    limit = get_monthly_limit(session["username"])
-    total = sum([e[1] for e in expenses])
-    return render_template("dashboard.html", name=session["name"], expenses=expenses, limit=limit, total=total)
 
 @app.route("/export/pdf")
 def export_pdf_route():
@@ -110,7 +99,6 @@ def export_excel_route():
 def email_report():
     if "username" not in session:
         return redirect("/login")
-    # For demo: Replace with actual values or prompt user later
     sender = "youremail@gmail.com"
     receiver = "youremail@gmail.com"
     password = "your_app_password"
@@ -121,6 +109,7 @@ def email_report():
     except Exception as e:
         flash(f"Failed to send email: {e}", "error")
     return redirect("/dashboard")
+
 @app.route("/set_limit", methods=["POST"])
 def set_limit():
     if "username" not in session:
@@ -132,10 +121,12 @@ def set_limit():
     except:
         flash("Enter a valid number", "error")
     return redirect("/dashboard")
+
 @app.route('/charts')
 def charts():
-    username = session['username']
-    expenses = get_expenses(username)
+    if "username" not in session:
+        return redirect("/login")
+    expenses = get_expenses(session["username"])
 
     category_totals = {}
     for category, amount, desc, date in expenses:
@@ -145,9 +136,6 @@ def charts():
     amounts = list(category_totals.values())
 
     return render_template('charts.html', categories=categories, amounts=amounts)
-
-
-
 
 @app.route("/logout")
 def logout():
