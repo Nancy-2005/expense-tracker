@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Expense Charts</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #e0f2fe, #f0f9ff);
+            margin: 0;
+            padding: 0;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        h2 {
+            text-align: center;
+            color: #0f172a;
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            max-width: 400px;
+            max-height: 400px;
+            margin: 20px auto;
+            display: block;
+        }
+
+        .btn-back {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn-back a {
+            background-color: #2563eb;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-back a:hover {
+            background-color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Expense Distribution</h2>
+    
+    <!-- Pie Chart -->
+    <canvas id="pieChart"></canvas>
+
+    <!-- Bar Chart -->
+    <canvas id="barChart"></canvas>
+
+    <div class="btn-back">
+        <a href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+    </div>
+</div>
+
+<script>
+    const labels = {{ categories|tojson }};
+    const data = {{ amounts|tojson }};
+
+    const pieConfig = {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Expense Distribution',
+                data: data,
+                backgroundColor: [
+                    '#60a5fa', '#f87171', '#34d399', '#fbbf24', '#a78bfa', '#fb7185', '#38bdf8'
+                ],
+                borderWidth: 1
+            }]
+        }
+    };
+
+    const barConfig = {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Expenses (₹)',
+                data: data,
+                backgroundColor: '#2563eb'
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 100
+                    }
+                }
+            }
+        }
+    };
+
+    new Chart(document.getElementById('pieChart'), pieConfig);
+    new Chart(document.getElementById('barChart'), barConfig);
+</script>
+</body>
+</html>

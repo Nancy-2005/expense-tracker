@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #dbeafe, #eff6ff);
+            color: #1f2937;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        header h1 {
+            text-align: center;
+            color: #113a8a;
+            font-size: 36px;
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .expense-form,
+        .limit-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        .expense-form select,
+        .expense-form input,
+        .limit-form input {
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .btn,
+        .btn-group .btn {
+            background-color: #0a53be;
+            color: #fff;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            background-color: #084298;
+        }
+
+        .btn.voice {
+            background-color: #10b981;
+        }
+
+        .btn.warning {
+            background-color: #f59e0b;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .limit {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .alert {
+            color: #dc2626;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th,
+        table td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: center;
+        }
+
+        table thead {
+            background-color: #e0e7ff;
+        }
+
+        .charts {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .charts img {
+            max-width: 300px;
+            margin: 10px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Welcome, {{ name }} 👋</h1>
+    </header>
+
+    <section class="controls">
+        <form action="{{ url_for('add_expense_route') }}" method="POST" class="expense-form">
+            <select name="category" required>
+                <option>Food</option>
+                <option>Medicine</option>
+                <option>Hospital</option>
+                <option>Gas</option>
+                <option>Current</option>
+                <option>Rapido</option>
+                <option>Other</option>
+            </select>
+            <input type="number" name="amount" placeholder="₹ Amount" required>
+            <input type="text" name="description" placeholder="Description" required>
+            <button type="submit" class="btn primary">Add Expense</button>
+        </form>
+
+        <div class="btn-group">
+            <button onclick="startListening()" class="btn voice">🎤 Speak Expense</button>
+            <a href="{{ url_for('export_pdf_route') }}" class="btn">📄 Export PDF</a>
+            <a href="{{ url_for('export_excel_route') }}" class="btn">📊 Export Excel</a>
+            
+            <a href="{{ url_for('charts') }}" class="btn">📈 View Charts</a>
+            <a href="{{ url_for('logout') }}" class="btn warning">🚪 Logout</a>
+
+        </div>
+        
+    </section>
+
+    <section class="limit">
+        <h2>Monthly Limit: ₹{{ limit }} | Spent: ₹{{ total }}</h2>
+        {% if total > limit and limit > 0 %}
+            <p class="alert">⚠️ You have exceeded your monthly limit!</p>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('set_limit') }}" class="limit-form">
+            <input type="number" name="limit" placeholder="Set Monthly Limit" required>
+            <button type="submit" class="btn warning">Update Limit</button>
+        </form>
+    </section>
+
+    <section class="expenses">
+        <h3 style="text-align:center">Recent Expenses</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>₹ Amount</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for e in expenses|reverse %}
+            <tr>
+                <td>{{ e[3] }}</td>
+                <td>{{ e[0] }}</td>
+                <td>₹{{ e[1] }}</td>
+                <td>{{ e[2] }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    
+</div>
+
+<script src="{{ url_for('static', filename='js/speech.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login | Expense Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #dbeafe, #eff6ff);
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            padding: 30px 40px 40px 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            animation: pop 0.4s ease;
+        }
+
+        .login-container img {
+            width: 70px;
+            margin-bottom: 15px;
+        }
+
+        .login-container h2 {
+            margin-bottom: 25px;
+            font-size: 24px;
+            color: #113a8a;
+            font-weight: 600;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 12px 14px;
+            margin-bottom: 18px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: 0.3s ease;
+        }
+
+        .login-container input:focus {
+            border-color: #0a53be;
+            outline: none;
+            box-shadow: 0 0 5px rgba(10, 83, 190, 0.3);
+        }
+
+        .login-container .btn {
+            background-color: #0a53be;
+            color: white;
+            padding: 12px;
+            font-size: 16px;
+            width: 50%;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s ease;
+        }
+
+        .login-container .btn:hover {
+            background-color: #084298;
+        }
+
+        .login-container p {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .login-container a {
+            color: #6c1d82;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        @keyframes pop {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <img src="{{ url_for('static', filename='images/expense_icon.png') }}" alt="Expense Icon" />
+        <h2>Login to Your Account</h2>
+        <form method="POST" action="{{ url_for('login') }}">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit" class="btn">Login</button>
+        </form>
+        <p>Don't have an account? <a href="{{ url_for('register') }}">Register</a></p>
+    </div>
+</body>
+</html>
