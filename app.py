@@ -21,6 +21,11 @@ init_db()
 @app.route("/")
 def home():
     return redirect("/login")
+@app.route("/register")
+def register():
+    return render_template("register.html")
+
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
