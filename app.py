@@ -10,7 +10,8 @@ from database import (
     get_monthly_limit,
     set_monthly_limit
 )
-from export import export_to_pdf, export_to_excel, email_pdf
+from export import export_to_pdf, export_to_excel
+
 
 
 app = Flask(__name__)
