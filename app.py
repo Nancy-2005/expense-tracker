@@ -86,17 +86,16 @@ def add_expense_route():
 
     add_expense(session["username"], category, amount, description)
     return redirect("/dashboard")
-
 @app.route("/export/pdf")
 def export_pdf_route():
     if "username" not in session:
         return redirect("/login")
     
     file_path = export_to_pdf(session["username"])
-    
-    print(f"[DEBUG] PDF File Path: {file_path}")  # ✅ DEBUG LOG
+    print(f"PDF File Path: {file_path}")  # Debug print
+    print(f"File exists: {os.path.exists(file_path)}")  # Debug print
 
-    if not file_path or not os.path.exists(file_path):
+    if not os.path.exists(file_path):
         flash("PDF generation failed.", "error")
         return redirect("/dashboard")
     
@@ -109,14 +108,15 @@ def export_excel_route():
         return redirect("/login")
     
     file_path = export_to_excel(session["username"])
-    
-    print(f"[DEBUG] Excel File Path: {file_path}")  # ✅ DEBUG LOG
+    print(f"Excel File Path: {file_path}")  # Debug print
+    print(f"File exists: {os.path.exists(file_path)}")  # Debug print
 
     if not file_path or not os.path.exists(file_path):
         flash("No expenses to export!", "error")
         return redirect("/dashboard")
     
     return send_file(file_path, as_attachment=True)
+
 
 
 @app.route("/set_limit", methods=["POST"])
