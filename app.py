@@ -12,6 +12,7 @@ from database import (
 )
 from export import export_to_pdf, export_to_excel, email_pdf
 
+
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  # Needed for session management
 
@@ -45,7 +46,7 @@ def login():
         password = request.form["password"]
         user = login_user(email, password)
         if user:
-            session["username"] = user[0]
+            session["username"] = user[0]  # should be a unique identifier
             session["name"] = user[1]
             return redirect("/dashboard")
         else:
@@ -55,11 +56,24 @@ def login():
 @app.route("/dashboard")
 def dashboard():
     if "username" not in session:
+        print("User not logged in. Redirecting to login.")
         return redirect("/login")
-    expenses = get_expenses(session["username"])
-    limit = get_monthly_limit(session["username"])
-    total = sum([e[1] for e in expenses])
-    return render_template("dashboard.html", name=session["name"], expenses=expenses, limit=limit, total=total)
+
+    try:
+        print("Fetching data for user:", session["username"])
+        expenses = get_expenses(session["username"])
+        limit = get_monthly_limit(session["username"])
+        total = sum([e[1] for e in expenses]) if expenses else 0
+
+        print("Expenses:", expenses)
+        print("Limit:", limit)
+        print("Total:", total)
+
+        return render_template("dashboard.html", name=session["name"], expenses=expenses, limit=limit, total=total)
+
+    except Exception as e:
+        print("Error in dashboard:", e)
+        return "Something went wrong in dashboard: " + str(e), 500
 
 @app.route("/add_expense", methods=["POST"])
 def add_expense_route():
