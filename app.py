@@ -95,20 +95,7 @@ def export_excel_route():
     export_to_excel(session["username"])
     return send_file("expense_report.xlsx", as_attachment=True)
 
-@app.route("/email_report")
-def email_report():
-    if "username" not in session:
-        return redirect("/login")
-    sender = "youremail@gmail.com"
-    receiver = "youremail@gmail.com"
-    password = "your_app_password"
-    export_to_pdf(session["username"])
-    try:
-        email_pdf(receiver, sender, password)
-        flash("Email sent successfully!", "success")
-    except Exception as e:
-        flash(f"Failed to send email: {e}", "error")
-    return redirect("/dashboard")
+
 
 @app.route("/set_limit", methods=["POST"])
 def set_limit():
