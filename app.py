@@ -93,14 +93,15 @@ def export_pdf_route():
         return redirect("/login")
     
     file_path = export_to_pdf(session["username"])
-    print(f"PDF File Path: {file_path}")  # ✅ Debug log
     
-    if not os.path.exists(file_path):
-        print("PDF file not found.")
+    print(f"[DEBUG] PDF File Path: {file_path}")  # ✅ DEBUG LOG
+
+    if not file_path or not os.path.exists(file_path):
         flash("PDF generation failed.", "error")
         return redirect("/dashboard")
     
     return send_file(file_path, as_attachment=True)
+
 
 @app.route("/export/excel")
 def export_excel_route():
@@ -108,14 +109,15 @@ def export_excel_route():
         return redirect("/login")
     
     file_path = export_to_excel(session["username"])
-    print(f"Excel File Path: {file_path}")  # ✅ Debug log
+    
+    print(f"[DEBUG] Excel File Path: {file_path}")  # ✅ DEBUG LOG
 
     if not file_path or not os.path.exists(file_path):
-        print("Excel file not found.")
         flash("No expenses to export!", "error")
         return redirect("/dashboard")
     
     return send_file(file_path, as_attachment=True)
+
 
 @app.route("/set_limit", methods=["POST"])
 def set_limit():
