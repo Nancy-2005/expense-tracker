@@ -11,7 +11,7 @@ from database import (
     set_monthly_limit
 )
 from export import export_to_pdf, export_to_excel
-
+import os
 
 
 app = Flask(__name__)
@@ -95,25 +95,32 @@ def add_expense_route():
 
     add_expense(session["username"], category, amount, description)
     return redirect("/dashboard")
-
-@app.route("/export/pdf")
 @app.route("/export/pdf")
 def export_pdf_route():
     if "username" not in session:
         return redirect("/login")
-    file_path = export_to_pdf(session["username"])
-    return send_file(file_path, as_attachment=True)
 
+    file_path = export_to_pdf(session["username"])
+    
+    if not file_path or not os.path.exists(file_path):
+        flash("Error generating PDF file.", "error")
+        return redirect("/dashboard")
+
+    return send_file(file_path, as_attachment=True, download_name="expense_report.pdf")
 
 @app.route("/export/excel")
 def export_excel_route():
     if "username" not in session:
         return redirect("/login")
+
     file_path = export_to_excel(session["username"])
-    if not file_path:
-        flash("No expenses to export!", "error")
+    
+    if not file_path or not os.path.exists(file_path):
+        flash("No expenses to export or error occurred!", "error")
         return redirect("/dashboard")
-    return send_file(file_path, as_attachment=True)
+
+    return send_file(file_path, as_attachment=True, download_name="expense_report.xlsx")
+
 
 
 
