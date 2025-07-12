@@ -3,11 +3,10 @@ from fpdf import FPDF
 import openpyxl
 import os
 
-DB_NAME = "users.db"
+DB_NAME = "expense.db"  # ✅ Consistent with your app and database.py
 
 def export_to_pdf(username):
-    file_path = f"{username}_report.pdf"
-
+    file_path = "report.pdf"
     print(f"Generating PDF at: {file_path}")
 
     pdf = FPDF()
@@ -20,6 +19,10 @@ def export_to_pdf(username):
         c.execute("SELECT category, amount, description, date FROM expenses WHERE username = ?", (username,))
         expenses = c.fetchall()
         conn.close()
+
+        if not expenses:
+            print("No expenses found.")
+            return None
 
         pdf.cell(200, 10, txt=f"Expense Report for {username}", ln=True, align="C")
         pdf.ln(10)
@@ -36,10 +39,9 @@ def export_to_pdf(username):
         print("Error in export_to_pdf:", e)
         return None
 
-def export_to_excel(username):
-    
-    file_path = f"{username}_report.xlsx"
 
+def export_to_excel(username):
+    file_path = "report.xlsx"
     print(f"Generating Excel at: {file_path}")
 
     try:

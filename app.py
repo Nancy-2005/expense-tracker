@@ -16,7 +16,7 @@ from export import export_to_pdf, export_to_excel
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
 
-# Initialize database
+# Initialize the database on startup
 init_db()
 
 @app.route("/")
@@ -57,7 +57,6 @@ def login():
 def dashboard():
     if "username" not in session:
         return redirect("/login")
-
     try:
         expenses = get_expenses(session["username"])
         limit = get_monthly_limit(session["username"])
@@ -86,21 +85,21 @@ def add_expense_route():
 
     add_expense(session["username"], category, amount, description)
     return redirect("/dashboard")
+
 @app.route("/export/pdf")
 def export_pdf_route():
     if "username" not in session:
         return redirect("/login")
     
     file_path = export_to_pdf(session["username"])
-    print(f"[DEBUG] PDF file path: {file_path}")  # 🔍 Debug
+    print(f"[DEBUG] PDF file path: {file_path}")
 
-    if not os.path.exists(file_path):
-        print("[ERROR] PDF file not found.")  # 🔍 Debug
+    if not file_path or not os.path.exists(file_path):
+        print("[ERROR] PDF file not found or generation failed.")
         flash("PDF generation failed.", "error")
         return redirect("/dashboard")
 
     return send_file(file_path, as_attachment=True)
-
 
 @app.route("/export/excel")
 def export_excel_route():
@@ -108,16 +107,14 @@ def export_excel_route():
         return redirect("/login")
 
     file_path = export_to_excel(session["username"])
-    print(f"[DEBUG] Excel file path: {file_path}")  # 🔍 Debug
+    print(f"[DEBUG] Excel file path: {file_path}")
 
     if not file_path or not os.path.exists(file_path):
-        print("[ERROR] Excel file not found or generation failed.")  # 🔍 Debug
+        print("[ERROR] Excel file not found or generation failed.")
         flash("No expenses to export!", "error")
         return redirect("/dashboard")
 
     return send_file(file_path, as_attachment=True)
-
-
 
 @app.route("/set_limit", methods=["POST"])
 def set_limit():
