@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, send_file, flash
 import sqlite3
+import os
 from datetime import datetime
 from database import (
     init_db,
@@ -11,13 +12,9 @@ from database import (
     set_monthly_limit
 )
 from export import export_to_pdf, export_to_excel
-import os
-from flask import current_app
-
-
 
 app = Flask(__name__)
-app.secret_key = "your_secret_key"  # Needed for session management
+app.secret_key = "your_secret_key"
 
 # Initialize database
 init_db()
@@ -49,7 +46,7 @@ def login():
         password = request.form["password"]
         user = login_user(email, password)
         if user:
-            session["username"] = user[0]  # should be a unique identifier
+            session["username"] = user[0]
             session["name"] = user[1]
             return redirect("/dashboard")
         else:
@@ -59,21 +56,13 @@ def login():
 @app.route("/dashboard")
 def dashboard():
     if "username" not in session:
-        print("User not logged in. Redirecting to login.")
         return redirect("/login")
 
     try:
-        print("Fetching data for user:", session["username"])
         expenses = get_expenses(session["username"])
         limit = get_monthly_limit(session["username"])
         total = sum([e[1] for e in expenses]) if expenses else 0
-
-        print("Expenses:", expenses)
-        print("Limit:", limit)
-        print("Total:", total)
-
         return render_template("dashboard.html", name=session["name"], expenses=expenses, limit=limit, total=total)
-
     except Exception as e:
         print("Error in dashboard:", e)
         return "Something went wrong in dashboard: " + str(e), 500
@@ -102,35 +91,31 @@ def add_expense_route():
 def export_pdf_route():
     if "username" not in session:
         return redirect("/login")
-    try:
-        file_path = export_to_pdf(session["username"])
-        if not file_path or not os.path.exists(file_path):
-            flash("PDF generation failed. File not found.", "error")
-            return redirect("/dashboard")
-        return send_file(file_path, as_attachment=True, download_name="expense_report.pdf")
-    except Exception as e:
-        current_app.logger.error(f"Error exporting PDF: {e}")
-        return "Internal Server Error while exporting PDF", 500
-
+    
+    file_path = export_to_pdf(session["username"])
+    print(f"PDF File Path: {file_path}")  # ✅ Debug log
+    
+    if not os.path.exists(file_path):
+        print("PDF file not found.")
+        flash("PDF generation failed.", "error")
+        return redirect("/dashboard")
+    
+    return send_file(file_path, as_attachment=True)
 
 @app.route("/export/excel")
 def export_excel_route():
     if "username" not in session:
         return redirect("/login")
-    try:
-        file_path = export_to_excel(session["username"])
-        if not file_path or not os.path.exists(file_path):
-            flash("Excel export failed. File not found.", "error")
-            return redirect("/dashboard")
-        return send_file(file_path, as_attachment=True, download_name="expense_report.xlsx")
-    except Exception as e:
-        current_app.logger.error(f"Error exporting Excel: {e}")
-        return "Internal Server Error while exporting Excel", 500
+    
+    file_path = export_to_excel(session["username"])
+    print(f"Excel File Path: {file_path}")  # ✅ Debug log
 
-
-
-
-
+    if not file_path or not os.path.exists(file_path):
+        print("Excel file not found.")
+        flash("No expenses to export!", "error")
+        return redirect("/dashboard")
+    
+    return send_file(file_path, as_attachment=True)
 
 @app.route("/set_limit", methods=["POST"])
 def set_limit():
