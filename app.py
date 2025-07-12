@@ -96,18 +96,24 @@ def add_expense_route():
     return redirect("/dashboard")
 
 @app.route("/export/pdf")
+@app.route("/export/pdf")
 def export_pdf_route():
     if "username" not in session:
         return redirect("/login")
-    export_to_pdf(session["username"])
-    return send_file("expense_report.pdf", as_attachment=True)
+    file_path = export_to_pdf(session["username"])
+    return send_file(file_path, as_attachment=True)
+
 
 @app.route("/export/excel")
 def export_excel_route():
     if "username" not in session:
         return redirect("/login")
-    export_to_excel(session["username"])
-    return send_file("expense_report.xlsx", as_attachment=True)
+    file_path = export_to_excel(session["username"])
+    if not file_path:
+        flash("No expenses to export!", "error")
+        return redirect("/dashboard")
+    return send_file(file_path, as_attachment=True)
+
 
 
 
