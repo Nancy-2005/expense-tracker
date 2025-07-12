@@ -6,7 +6,8 @@ import os
 DB_NAME = "users.db"
 
 def export_to_pdf(username):
-    file_path = f"/tmp/{username}_report.pdf"
+    file_path = f"{username}_report.pdf"
+
     print(f"Generating PDF at: {file_path}")
 
     pdf = FPDF()
@@ -36,7 +37,9 @@ def export_to_pdf(username):
         return None
 
 def export_to_excel(username):
-    file_path = f"/tmp/{username}_report.xlsx"
+    
+    file_path = f"{username}_report.xlsx"
+
     print(f"Generating Excel at: {file_path}")
 
     try:
