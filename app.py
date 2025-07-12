@@ -92,13 +92,13 @@ def export_pdf_route():
         return redirect("/login")
     
     file_path = export_to_pdf(session["username"])
-    print(f"PDF File Path: {file_path}")  # Debug print
-    print(f"File exists: {os.path.exists(file_path)}")  # Debug print
+    print(f"[DEBUG] PDF file path: {file_path}")  # 🔍 Debug
 
     if not os.path.exists(file_path):
+        print("[ERROR] PDF file not found.")  # 🔍 Debug
         flash("PDF generation failed.", "error")
         return redirect("/dashboard")
-    
+
     return send_file(file_path, as_attachment=True)
 
 
@@ -106,15 +106,15 @@ def export_pdf_route():
 def export_excel_route():
     if "username" not in session:
         return redirect("/login")
-    
+
     file_path = export_to_excel(session["username"])
-    print(f"Excel File Path: {file_path}")  # Debug print
-    print(f"File exists: {os.path.exists(file_path)}")  # Debug print
+    print(f"[DEBUG] Excel file path: {file_path}")  # 🔍 Debug
 
     if not file_path or not os.path.exists(file_path):
+        print("[ERROR] Excel file not found or generation failed.")  # 🔍 Debug
         flash("No expenses to export!", "error")
         return redirect("/dashboard")
-    
+
     return send_file(file_path, as_attachment=True)
 
 
